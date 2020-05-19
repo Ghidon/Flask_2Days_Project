@@ -1,11 +1,11 @@
 from flask import Flask, json, request
 from Instruments import Instruments
 from Users import User
+from Form import RegistrationForm
 
 
 app = Flask(__name__)
 
-data = {}
 instruments = {}
 users = {}
 
@@ -129,8 +129,16 @@ def add_video_to_instrument(instrument_id, youtube):
             return 'There is no such instrument'
 
 
-if __name__ == '__main__':
-    app.run()
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    form = RegistrationForm(request.form)
+    if request.method == 'POST' and form.validate():
+        user = User(form.username.data, form.email.data,
+                    form.password.data)
+        db_session.add(user)
+        flash('Thanks for registering')
+        return redirect(url_for('login'))
+    return render_template('register.html', form=form)
 
 
 if __name__ == '__main__':
